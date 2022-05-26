@@ -3,6 +3,7 @@ package com.abraham.coder.jpa;
 import com.abraham.coder.jpa.domain.FieldsInfo;
 import com.abraham.coder.jpa.domain.MethodInfo;
 import com.abraham.coder.jpa.service.BreakerInfoService;
+import com.abraham.coder.pkg.utils.PackageUtils;
 import com.benliu.jpa.annotation.JpaColumn;
 import com.benliu.jpa.annotation.JpaDto;
 import com.squareup.javapoetx.*;
@@ -42,30 +43,30 @@ public class App {
         };
 
         MethodInfo[] repositoryMethods = {
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","dto","NodeMatchDeduceDto"),"findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
                         new AnnotationVal[]{new AnnotationVal("value","$S",new Object[]{""}),new AnnotationVal("nativeQuery","$L",new Object[]{true})},
                         new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
                         null),
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","entity","BreakerInfo"),"findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
                         new AnnotationVal[]{new AnnotationVal("value","$S",new Object[]{""}),new AnnotationVal("nativeQuery","$L",new Object[]{true})},
                         new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
                         null)
         };
 
         MethodInfo[] serviceMethods = {
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","dto","NodeMatchDeduceDto"),"findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
                         new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
                         null),
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","entity","BreakerInfo"), "findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
                         new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
                         null)
         };
 
         MethodInfo[] serviceImplMethods = {
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC},Query.class,null,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","dto","NodeMatchDeduceDto"),"findBySubstationGisId",new Modifier[]{Modifier.PUBLIC},Query.class,null,
                         new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
                         null),
-                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC},Query.class,null,
+                new MethodInfo("java.util.List",PackageUtils.buildPkg("jpa","entity","BreakerInfo"), "findMatchNode",new Modifier[]{Modifier.PUBLIC},Query.class,null,
                         new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
                         null)
         };
@@ -78,22 +79,22 @@ public class App {
         */
 
         // Dto
-        buildJava("com.abraham.coder.jpa.dto","NodeMatchDeduceDto",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS, false,
+        buildJava(PackageUtils.buildPkg("jpa","dto","NodeMatchDeduceDto"),new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS, false,
                 null,null,JpaDto.class,null,getClassFields(dtoFields),null);
 
         //Repository
-        buildJava("com.abraham.coder.jpa.repository","BreakerInfoRepository",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
-                getExtends("com.benliu.jpa.repository.BaseRepository","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),null,Repository.class,null,null,
+        buildJava(PackageUtils.buildPkg("jpa","repository","BreakerInfoRepository"),new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
+                getExtends("com.benliu.jpa.repository.BaseRepository",PackageUtils.buildPkg("jpa","entity","BreakerInfo"),"java.lang.String"),null,Repository.class,null,null,
                 getMethods(repositoryMethods));
 
         //Service
-        buildJava("com.abraham.coder.jpa.service","BreakerInfoService",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
-                getExtends("com.benliu.jpa.service.BaseService","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),null,Repository.class,null,null,
+        buildJava(PackageUtils.buildPkg("jpa","service","BreakerInfoService"),new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
+                getExtends("com.benliu.jpa.service.BaseService",PackageUtils.buildPkg("jpa","entity","BreakerInfo"),"java.lang.String"),null,Repository.class,null,null,
                 getMethods(serviceMethods));
 
         //ServiceImpl
-        buildJava("com.abraham.coder.jpa.service.impl","BreakerInfoServiceImpl",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS,true,
-                getExtends("com.benliu.jpa.service.impl.BaseServiceImpl","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),
+        buildJava(PackageUtils.buildPkg("jpa","service.impl","BreakerInfoServiceImpl"),new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS,true,
+                getExtends("com.benliu.jpa.service.impl.BaseServiceImpl",PackageUtils.buildPkg("jpa","entity","BreakerInfo"),"java.lang.String"),
                 BreakerInfoService.class,Repository.class,null,null,
                 getServiceImplMethods());
 
@@ -130,8 +131,7 @@ public class App {
 
     /**
      * 构建Java类文件
-     * @param pkg 包路径
-     * @param clazz 类名称
+     * @param clazzPkg 类的包路径
      * @param modifiers 修饰符
      * @param kind 类/接口/枚举/注解
      * @param isFully 是否既继承又实现
@@ -143,7 +143,11 @@ public class App {
      * @param method 类里面的方法
      */
     @SneakyThrows
-    private static void buildJava(String pkg, String clazz, Modifier[] modifiers, TypeSpec.Kind kind, Boolean isFully, com.squareup.javapoetx.TypeName extend, Class<?> implement, Class<? extends Annotation> annotated,AnnotationVal[] annotationsVal, List<FieldSpec> fields,List<com.squareup.javapoetx.MethodSpec> method){
+    private static void buildJava(String clazzPkg, Modifier[] modifiers, TypeSpec.Kind kind, Boolean isFully, com.squareup.javapoetx.TypeName extend, Class<?> implement, Class<? extends Annotation> annotated,AnnotationVal[] annotationsVal, List<FieldSpec> fields,List<com.squareup.javapoetx.MethodSpec> method){
+
+        String pkg = clazzPkg.substring(0,clazzPkg.lastIndexOf("."));
+
+        String clazz = clazzPkg.substring(clazzPkg.lastIndexOf(".")+1);
 
         TypeSpec typeSpec = null;
 

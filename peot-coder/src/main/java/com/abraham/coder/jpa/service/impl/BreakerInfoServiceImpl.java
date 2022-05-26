@@ -3,12 +3,13 @@ package com.abraham.coder.jpa.service.impl;
 import com.abraham.coder.jpa.dto.NodeMatchDeduceDto;
 import com.abraham.coder.jpa.entity.BreakerInfo;
 import com.abraham.coder.jpa.service.BreakerInfoService;
-import com.benliu.jpa.service.impl.BaseServiceImpl;
 import java.lang.Double;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.benliu.jpa.service.impl.BaseServiceImpl;
 import org.springframework.stereotype.Repository;
 
 @Repository
