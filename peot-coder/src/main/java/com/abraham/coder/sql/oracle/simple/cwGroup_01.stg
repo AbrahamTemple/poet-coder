@@ -1,0 +1,15 @@
+sqlTemplate(columns,conditions,expressions,gbcolumns)
+::= <<select <columns;separator=",">
+from table where case
+group by <columns;separator=",">
+>>
+
+/**
+SELECT transformer_type,COUNT(DISTINCT(user_code)) transformer_count FROM power_transformer_info WHERE CASE\n" +
+			"WHEN :#{#type == 'transformer'} = 1 AND gisid = :codes THEN 1\n" +
+			"WHEN :#{#type == 'circuit'} = 1 AND circuit_gisid = :codes THEN 1\n" +
+			"WHEN :#{#type == 'substation'} = 1 AND substation_gisid = :codes THEN 1\n" +
+			"WHEN :#{#type == 'area'} = 1 AND area_code = :codes THEN 1\n" +
+			"else 0 end = 1\n" +
+			"group by transformer_type
+*/

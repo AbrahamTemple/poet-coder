@@ -6,7 +6,9 @@ import com.benliu.jpa.service.BaseService;
 import java.lang.Double;
 import java.lang.String;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface BreakerInfoService extends BaseService<BreakerInfo, String> {
   List<NodeMatchDeduceDto> findBySubstationGisId(String subGisId);
 

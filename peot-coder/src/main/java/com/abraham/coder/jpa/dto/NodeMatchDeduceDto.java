@@ -6,10 +6,8 @@ import com.benliu.jpa.annotation.JpaDto;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.List;
-import lombok.Data;
 
 @JpaDto
-@Data
 public class NodeMatchDeduceDto {
   @JpaColumn("node_type")
   private Integer nodeType;

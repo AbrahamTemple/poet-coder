@@ -17,13 +17,7 @@ package com.squareup.javapoetx;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -409,6 +403,17 @@ public final class MethodSpec {
       return addParameter(com.squareup.javapoetx.TypeName.get(type), name, modifiers);
     }
 
+    public Builder addParameters(ParameterVal[] val){
+      for (ParameterVal v : val) {
+        if(v.getModifier() == null) {
+          addParameter(v.getType(), v.getName());
+        } else {
+          addParameter(v.getType(), v.getName(), v.getModifier());
+        }
+      }
+      return this;
+    }
+
     public Builder varargs() {
       return varargs(true);
     }
@@ -523,6 +528,13 @@ public final class MethodSpec {
 
     public Builder addStatement(String format, Object... args) {
       code.addStatement(format, args);
+      return this;
+    }
+
+    public Builder addStatements(CodeVal[] val){
+      Arrays.stream(val).sorted(Comparator.comparingInt(CodeVal::getSort)).forEach(v->{
+        code.addStatement(v.getFormat(), v.getArgs());
+      });
       return this;
     }
 

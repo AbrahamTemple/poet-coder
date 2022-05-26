@@ -17,7 +17,7 @@ import java.util.Date;
 
 /**
  * @ClassName BreakerInfo
- * @author AbrahamVong
+ * @author
  * @since 2022-4-19 10:01:50
  */
 @Data

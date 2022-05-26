@@ -9,9 +9,9 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
-@Service
+@Repository
 public class BreakerInfoServiceImpl extends BaseServiceImpl<BreakerInfo, String> implements BreakerInfoService {
   public List<NodeMatchDeduceDto> findBySubstationGisId(String subGisId) {
     List<NodeMatchDeduceDto> result = new ArrayList<>();

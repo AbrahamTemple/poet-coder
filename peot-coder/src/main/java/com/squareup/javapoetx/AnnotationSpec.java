@@ -197,6 +197,13 @@ public final class AnnotationSpec {
       this.type = type;
     }
 
+    public Builder addMembers(AnnotationVal[] val) {
+      for (AnnotationVal v : val) {
+        addMember(v.getName(),CodeBlock.of(v.getFormat(), v.getArgs()));
+      }
+      return this;
+    }
+
     public Builder addMember(String name, String format, Object... args) {
       return addMember(name, CodeBlock.of(format, args));
     }

@@ -112,14 +112,6 @@
             </snapshots>
         </repository>
         <repository>
-            <id>private-release</id>
-            <url>http://192.168.0.203:8081/repository/private-release/</url>
-        </repository>
-        <repository>
-            <id>private-snapshot</id>
-            <url>http://192.168.0.203:8081/repository/private-snapshot/</url>
-        </repository>
-        <repository>
             <id>spring-releases</id>
             <url>https://repo.spring.io/libs-release</url>
         </repository>

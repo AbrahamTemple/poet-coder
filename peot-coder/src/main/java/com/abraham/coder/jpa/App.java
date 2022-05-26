@@ -5,17 +5,15 @@ import com.abraham.coder.jpa.domain.MethodInfo;
 import com.abraham.coder.jpa.service.BreakerInfoService;
 import com.benliu.jpa.annotation.JpaColumn;
 import com.benliu.jpa.annotation.JpaDto;
-import com.squareup.javapoetx.FieldSpec;
-import com.squareup.javapoetx.JavaFile;
-import com.squareup.javapoetx.TypeName;
+import com.squareup.javapoetx.*;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +32,7 @@ public class App {
 
     public static void main(String[] args) {
 
-        FieldsInfo[] infos = {
+        FieldsInfo[] dtoFields = {
                 new FieldsInfo(Integer.class, "nodeType", Modifier.PRIVATE),
                 new FieldsInfo(String.class,"nodeCode",Modifier.PRIVATE),
                 new FieldsInfo(String.class,"nodeName",Modifier.PRIVATE),
@@ -43,18 +41,67 @@ public class App {
                 new FieldsInfo(getComplexField_01(),"locationList",Modifier.PRIVATE)
         };
 
-        buildDto("com.abraham.coder.jpa.dto","NodeMatchDeduceDto",getClassFields(infos));
-        buildRepository("com.abraham.coder.jpa.repository","BreakerInfoRepository",
-                getRepositoryExtends("com.benliu.jpa.repository.BaseRepository","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),
-                getRepositoryMethods());
-        buildService("com.abraham.coder.jpa.service","BreakerInfoService",
-                getServiceExtends("com.benliu.jpa.service.BaseService","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),
-                getServiceMethods());
-        //无法既又继承，又去实现：接口只能继承、类只能去实现
-        buildServiceImpl("com.abraham.coder.jpa.service.impl","BreakerInfoServiceImpl"
-                ,getServiceImplExtends("com.benliu.jpa.implement.impl.BaseServiceImpl","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String")
-                ,BreakerInfoService.class
-                ,getServiceImplMethods());
+        MethodInfo[] repositoryMethods = {
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
+                        new AnnotationVal[]{new AnnotationVal("value","$S",new Object[]{""}),new AnnotationVal("nativeQuery","$L",new Object[]{true})},
+                        new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
+                        null),
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,
+                        new AnnotationVal[]{new AnnotationVal("value","$S",new Object[]{""}),new AnnotationVal("nativeQuery","$L",new Object[]{true})},
+                        new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
+                        null)
+        };
+
+        MethodInfo[] serviceMethods = {
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
+                        new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
+                        null),
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC, Modifier.ABSTRACT},Query.class,null,
+                        new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
+                        null)
+        };
+
+        MethodInfo[] serviceImplMethods = {
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.dto.NodeMatchDeduceDto","findBySubstationGisId",new Modifier[]{Modifier.PUBLIC},Query.class,null,
+                        new ParameterVal[]{new ParameterVal(String.class, "subGisId",null)},
+                        null),
+                new MethodInfo("java.util.List","com.abraham.coder.jpa.entity.BreakerInfo", "findMatchNode",new Modifier[]{Modifier.PUBLIC},Query.class,null,
+                        new ParameterVal[]{new ParameterVal(Double.class,"latitude",null),new ParameterVal(Double.class,"longitude",null),new ParameterVal(Double.class,"radius",null)},
+                        null)
+        };
+
+
+        /*
+        * 缺陷：
+        * 1、构建类的时候不能构建多个类上注解
+        * 2、复杂类字段难以封装
+        */
+
+        // Dto
+        buildJava("com.abraham.coder.jpa.dto","NodeMatchDeduceDto",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS, false,
+                null,null,JpaDto.class,null,getClassFields(dtoFields),null);
+
+        //Repository
+        buildJava("com.abraham.coder.jpa.repository","BreakerInfoRepository",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
+                getExtends("com.benliu.jpa.repository.BaseRepository","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),null,Repository.class,null,null,
+                getMethods(repositoryMethods));
+
+        //Service
+        buildJava("com.abraham.coder.jpa.service","BreakerInfoService",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.INTERFACE,false,
+                getExtends("com.benliu.jpa.service.BaseService","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),null,Repository.class,null,null,
+                getMethods(serviceMethods));
+
+        //ServiceImpl
+        buildJava("com.abraham.coder.jpa.service.impl","BreakerInfoServiceImpl",new Modifier[]{Modifier.PUBLIC}, TypeSpec.Kind.CLASS,true,
+                getExtends("com.benliu.jpa.service.impl.BaseServiceImpl","com.abraham.coder.jpa.entity.BreakerInfo","java.lang.String"),
+                BreakerInfoService.class,Repository.class,null,null,
+                getServiceImplMethods());
+
+        /*
+         *  新问题：难以封装不定条可变代码块
+         *  addStatement("$T result = new $T<>()", listOfNodeMatchDeduceDto, arrayList)
+         *  addStatement("return result.isEmpty() ? $T.emptyList() : result", Collections.class)
+         */
     }
 
     /**
@@ -82,76 +129,79 @@ public class App {
     }
 
     /**
-     * 构建Repository
-     * @param pkg
-     * @param clazz
-     * @param extend
-     * @param method
+     * 构建Java类文件
+     * @param pkg 包路径
+     * @param clazz 类名称
+     * @param modifiers 修饰符
+     * @param kind 类/接口/枚举/注解
+     * @param isFully 是否既继承又实现
+     * @param extend 继承的类
+     * @param implement 实现的类
+     * @param annotated 类上的注解
+     * @param annotationsVal 注解上的值
+     * @param fields 类里面的成员变量
+     * @param method 类里面的方法
      */
     @SneakyThrows
-    private static void buildRepository(String pkg, String clazz, com.squareup.javapoetx.TypeName extend, List<com.squareup.javapoetx.MethodSpec> method){
+    private static void buildJava(String pkg, String clazz, Modifier[] modifiers, TypeSpec.Kind kind, Boolean isFully, com.squareup.javapoetx.TypeName extend, Class<?> implement, Class<? extends Annotation> annotated,AnnotationVal[] annotationsVal, List<FieldSpec> fields,List<com.squareup.javapoetx.MethodSpec> method){
 
-        com.squareup.javapoetx.JavaFile javaFile = com.squareup.javapoetx.JavaFile.builder(pkg,
-                com.squareup.javapoetx.TypeSpec.interfaceBuilder(clazz)
-                        .addSuperinterface(extend)
-                        .addAnnotation(Repository.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addMethods(method)
-                        .build())
-                .build();
+        TypeSpec typeSpec = null;
+
+        TypeSpec.Builder builder = null;
+
+        if (kind == TypeSpec.Kind.INTERFACE)
+        {
+            builder = TypeSpec.interfaceBuilder(clazz);
+        }
+        else if(kind == TypeSpec.Kind.CLASS && isFully)
+        {
+            builder = com.squareup.javapoetx.TypeSpec.classBuilder(clazz,true);
+        }
+        else
+        {
+            builder = com.squareup.javapoetx.TypeSpec.classBuilder(clazz,false);
+        }
+
+        if(null != extend){
+            builder.addSuperinterface(extend);
+        }
+
+        if(null != implement){
+            builder.addSuperAbstract(implement);
+        }
+
+        if(null != fields && !fields.isEmpty()){
+            builder.addFields(fields);
+        }
+
+        if(null != method && !method.isEmpty()){
+            builder.addMethods(method);
+        }
+
+        if(null != modifiers && modifiers.length > 0){
+            builder.addModifiers(modifiers);
+        }
+
+        if(null != annotated){
+
+            if(null != annotationsVal && annotationsVal.length > 0) {
+                builder
+                        .addAnnotation(com.squareup.javapoetx.AnnotationSpec.builder(annotated)
+                                .addMembers(annotationsVal)
+                                .build());
+            } else {
+                builder.addAnnotation(annotated);
+            }
+
+        }
+
+        typeSpec = builder.build();
+
+        com.squareup.javapoetx.JavaFile javaFile = com.squareup.javapoetx.JavaFile.builder(pkg,typeSpec).build();
 
         File file = new File(root);
 
         javaFile.writeTo(file);
-    }
-
-    /**
-     * 构建Service
-     * @param pkg
-     * @param clazz
-     * @param extend
-     * @param method
-     */
-    @SneakyThrows
-    private static void buildService(String pkg, String clazz, com.squareup.javapoetx.TypeName extend, List<com.squareup.javapoetx.MethodSpec> method){
-
-        com.squareup.javapoetx.JavaFile javaFile = com.squareup.javapoetx.JavaFile.builder(pkg,
-                com.squareup.javapoetx.TypeSpec.interfaceBuilder(clazz)
-                        .addSuperinterface(extend)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addMethods(method)
-                        .build())
-                .build();
-
-        File file = new File(root);
-
-        javaFile.writeTo(file);
-    }
-
-    /**
-     * 构建实现类
-     * @param pkg
-     * @param clazz
-     * @param extend
-     * @param method
-     */
-    @SneakyThrows
-    private static void buildServiceImpl(String pkg, String clazz, com.squareup.javapoetx.TypeName extend,Class<?> implement, List<com.squareup.javapoetx.MethodSpec> method){
-
-        com.squareup.javapoetx.JavaFile javaFile = JavaFile.builder(pkg,
-                com.squareup.javapoetx.TypeSpec.classBuilder(clazz,true)
-                        .addSuperinterface(extend)
-                        .addSuperAbstract(implement)
-                        .addAnnotation(Service.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addMethods(method)
-                        .build())
-                .build();
-
-        File file = new File(root);
-
-        javaFile.writeTo(file);
-
     }
 
     /**
@@ -194,84 +244,22 @@ public class App {
     }
 
     /**
-     * 构建Repository的继承
+     * 构建继承
      * @return
      */
-    private static com.squareup.javapoetx.TypeName getRepositoryExtends(String clazz, String... generics){
+    private static com.squareup.javapoetx.TypeName getExtends(String clazz, String... generics){
 
         List<com.squareup.javapoetx.ClassName> genericsList = new ArrayList<>();
 
-        for(String clz :generics){
+        for (String clz : generics) {
 
-            genericsList.add(com.squareup.javapoetx.ClassName.get(clz.substring(0,clz.lastIndexOf(".")), clz.substring(clz.lastIndexOf(".")+ 1)));
+            genericsList.add(com.squareup.javapoetx.ClassName.get(clz.substring(0, clz.lastIndexOf(".")), clz.substring(clz.lastIndexOf(".") + 1)));
 
         }
 
         com.squareup.javapoetx.ClassName repository = com.squareup.javapoetx.ClassName.get(clazz.substring(0,clazz.lastIndexOf(".")), clazz.substring(clazz.lastIndexOf(".")+ 1) );
 
         return com.squareup.javapoetx.ParameterizedTypeName.get(repository, genericsList.stream().toArray(com.squareup.javapoetx.ClassName[]::new));
-
-//        com.squareup.javapoetx.ClassName repository = com.squareup.javapoetx.ClassName.get("com.benliu.jpa.repository", "BaseRepository");
-//
-//        com.squareup.javapoetx.ClassName breakerInfo = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.entity", "BreakerInfo");
-//
-//        com.squareup.javapoetx.ClassName string = com.squareup.javapoetx.ClassName.get("java.lang", "String");
-//
-//        return com.squareup.javapoetx.ParameterizedTypeName.get(repository,breakerInfo,string);
-    }
-
-    /**
-     * 构建Service的继承
-     * @return
-     */
-    private static com.squareup.javapoetx.TypeName getServiceExtends(String clazz, String... generics){
-
-        List<com.squareup.javapoetx.ClassName> genericsList = new ArrayList<>();
-
-        for(String clz :generics){
-
-            genericsList.add(com.squareup.javapoetx.ClassName.get(clz.substring(0,clz.lastIndexOf(".")), clz.substring(clz.lastIndexOf(".")+ 1)));
-
-        }
-
-        com.squareup.javapoetx.ClassName service = com.squareup.javapoetx.ClassName.get(clazz.substring(0,clazz.lastIndexOf(".")), clazz.substring(clazz.lastIndexOf(".")+ 1) );
-
-        return com.squareup.javapoetx.ParameterizedTypeName.get(service, genericsList.stream().toArray(com.squareup.javapoetx.ClassName[]::new));
-
-//        com.squareup.javapoetx.ClassName breakerInfo = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.entity", "BreakerInfo");
-//
-//        com.squareup.javapoetx.ClassName string = com.squareup.javapoetx.ClassName.get("java.lang", "String");
-//
-//        com.squareup.javapoetx.ClassName service = com.squareup.javapoetx.ClassName.get("com.benliu.jpa.service", "BaseService");
-//
-//        return com.squareup.javapoetx.ParameterizedTypeName.get(service,breakerInfo,string);
-    }
-
-    /**
-     * 构建ServiceImpl的继承
-     * @return
-     */
-    private static com.squareup.javapoetx.TypeName getServiceImplExtends(String clazz, String... generics){
-
-        List<com.squareup.javapoetx.ClassName> genericsList = new ArrayList<>();
-
-        for(String clz :generics){
-
-            genericsList.add(com.squareup.javapoetx.ClassName.get(clz.substring(0,clz.lastIndexOf(".")), clz.substring(clz.lastIndexOf(".")+ 1)));
-
-        }
-
-        com.squareup.javapoetx.ClassName implement = com.squareup.javapoetx.ClassName.get(clazz.substring(0,clazz.lastIndexOf(".")), clazz.substring(clazz.lastIndexOf(".")+ 1) );
-
-        return com.squareup.javapoetx.ParameterizedTypeName.get(implement, genericsList.stream().toArray(com.squareup.javapoetx.ClassName[]::new));
-
-//        com.squareup.javapoetx.ClassName breakerInfo = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.entity", "BreakerInfo");
-//
-//        com.squareup.javapoetx.ClassName string = com.squareup.javapoetx.ClassName.get("java.lang", "String");
-//
-//        com.squareup.javapoetx.ClassName serviceImpl = com.squareup.javapoetx.ClassName.get("com.benliu.jpa.implement.impl", "BaseServiceImpl");
-//
-//        return com.squareup.javapoetx.ParameterizedTypeName.get(serviceImpl,breakerInfo,string);
     }
 
     /**
@@ -317,96 +305,47 @@ public class App {
         return methods;
     }
 
-    /**
-     * 得到Service所有的方法
-     * @return
-     */
-    private static List<com.squareup.javapoetx.MethodSpec> getServiceMethods(){
-        List<com.squareup.javapoetx.MethodSpec> methods = new ArrayList<>();
-
-        com.squareup.javapoetx.ClassName list = com.squareup.javapoetx.ClassName.get("java.util", "List");
-
-        com.squareup.javapoetx.ClassName nodeMatchDeduceDto = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.dto", "NodeMatchDeduceDto");
-        com.squareup.javapoetx.ClassName breakerInfo = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.entity", "BreakerInfo");
-
-
-        com.squareup.javapoetx.TypeName listOfNodeMatchDeduceDto = com.squareup.javapoetx.ParameterizedTypeName.get(list, nodeMatchDeduceDto);
-        com.squareup.javapoetx.TypeName listOfBreakerInfo = com.squareup.javapoetx.ParameterizedTypeName.get(list,breakerInfo);
-
-        com.squareup.javapoetx.MethodSpec findBySubstationGisId = com.squareup.javapoetx.MethodSpec.methodBuilder("findBySubstationGisId")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameter(String.class, "subGisId")
-                .returns(listOfNodeMatchDeduceDto)
-                .build();
-
-
-        com.squareup.javapoetx.MethodSpec findMatchNode = com.squareup.javapoetx.MethodSpec.methodBuilder("findMatchNode")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameter(Double.class,"latitude")
-                .addParameter(Double.class,"longitude")
-                .addParameter(Double.class,"radius")
-                .returns(listOfBreakerInfo)
-                .build();
-
-        methods.add(findBySubstationGisId);
-
-        methods.add(findMatchNode);
-
-        return methods;
-    }
 
     /**
-     * 得到Repository所有的方法
+     * 构建所有的方法
      * @return
      */
-    private static List<com.squareup.javapoetx.MethodSpec> getRepositoryMethods(MethodInfo... method){
+    private static List<com.squareup.javapoetx.MethodSpec> getMethods(MethodInfo... infos){
         List<com.squareup.javapoetx.MethodSpec> methods = new ArrayList<>();
 
-        for (MethodInfo info : method) {
+        for (MethodInfo info : infos) {
 
             com.squareup.javapoetx.ClassName type = com.squareup.javapoetx.ClassName.get(info.getType().substring(0,info.getType().lastIndexOf(".")),info.getType().substring(info.getType().lastIndexOf(".")+1));
 
-            com.squareup.javapoetx.ClassName name = com.squareup.javapoetx.ClassName.get(info.getName().substring(0,info.getName().lastIndexOf(".")),info.getName().substring(info.getName().lastIndexOf(".")+1));
+            com.squareup.javapoetx.ClassName generics = com.squareup.javapoetx.ClassName.get(info.getGenerics().substring(0,info.getGenerics().lastIndexOf(".")),info.getGenerics().substring(info.getGenerics().lastIndexOf(".")+1));
 
+            com.squareup.javapoetx.TypeName clazz = generics !=null ? com.squareup.javapoetx.ParameterizedTypeName.get(type,generics) : com.squareup.javapoetx.ParameterizedTypeName.get(type);
+
+            MethodSpec.Builder builder = MethodSpec.methodBuilder(info.getName());
+
+            if(null != info.getModifiers() && info.getModifiers().length > 0){
+                builder.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+            }
+
+            if(null != info.getAnnotationsVal() && info.getAnnotationsVal().length > 0) {
+                builder
+                        .addAnnotation(com.squareup.javapoetx.AnnotationSpec.builder(info.getAnnotated())
+                                .addMembers(info.getAnnotationsVal())
+                                .build());
+            }
+
+            if(null != info.getParametersVal() && info.getParametersVal().length > 0){
+                builder.addParameters(info.getParametersVal());
+            }
+
+            if(null != info.getCodesVal() && info.getCodesVal().length > 0){
+                builder.addStatements(info.getCodesVal());
+            }
+
+            builder.returns(clazz);
+
+            methods.add(builder.build());
         }
-
-
-
-        com.squareup.javapoetx.ClassName list = com.squareup.javapoetx.ClassName.get("java.util", "List");
-
-        com.squareup.javapoetx.ClassName nodeMatchDeduceDto = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.dto", "NodeMatchDeduceDto");
-        com.squareup.javapoetx.ClassName breakerInfo = com.squareup.javapoetx.ClassName.get("com.abraham.coder.jpa.entity", "BreakerInfo");
-
-
-        com.squareup.javapoetx.TypeName listOfNodeMatchDeduceDto = com.squareup.javapoetx.ParameterizedTypeName.get(list, nodeMatchDeduceDto);
-        com.squareup.javapoetx.TypeName listOfBreakerInfo = com.squareup.javapoetx.ParameterizedTypeName.get(list,breakerInfo);
-
-        com.squareup.javapoetx.MethodSpec findBySubstationGisId = com.squareup.javapoetx.MethodSpec.methodBuilder("findBySubstationGisId")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addAnnotation(com.squareup.javapoetx.AnnotationSpec.builder(Query.class)
-                        .addMember("value","$S","")
-                        .addMember("nativeQuery","$L",true)
-                        .build())
-                .addParameter(String.class, "subGisId")
-                .returns(listOfNodeMatchDeduceDto)
-                .build();
-
-
-        com.squareup.javapoetx.MethodSpec findMatchNode = com.squareup.javapoetx.MethodSpec.methodBuilder("findMatchNode")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addAnnotation(com.squareup.javapoetx.AnnotationSpec.builder(Query.class)
-                        .addMember("value","$S","")
-                        .addMember("nativeQuery","$L",true)
-                        .build())
-                .addParameter(Double.class,"latitude")
-                .addParameter(Double.class,"longitude")
-                .addParameter(Double.class,"radius")
-                .returns(listOfBreakerInfo)
-                .build();
-
-        methods.add(findBySubstationGisId);
-
-        methods.add(findMatchNode);
 
         return methods;
     }
