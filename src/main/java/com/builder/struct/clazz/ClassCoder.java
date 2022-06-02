@@ -27,4 +27,13 @@ public interface ClassCoder {
      * @param method 类里面的方法
      */
     void buildJava(String clazzPkg, Modifier[] modifiers, TypeSpec.Kind kind, Integer isImpl, Object extend, Object implement, List<AnnotationGroup> annotations, List<FieldSpec> fields, List<MethodSpec> method);
+
+
+    /**
+     * 构建继承
+     * @param clazz 类包
+     * @param generics 泛型
+     * @return
+     */
+    TypeName getExtends(String clazz, String... generics);
 }

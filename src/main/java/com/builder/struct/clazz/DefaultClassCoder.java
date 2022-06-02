@@ -8,6 +8,7 @@ import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,6 +81,14 @@ public class DefaultClassCoder implements ClassCoder{
                 builder.addSuperAbstract((TypeName) implement);
             } else if (implement instanceof Type){
                 builder.addSuperAbstract((Type) implement);
+            } else if (implement instanceof TypeName[]){
+                for (TypeName impl : (TypeName[]) implement) {
+                    builder.addSuperAbstract(impl);
+                }
+            } else if (implement instanceof Type[]){
+                for (Type impl : (Type[]) implement) {
+                    builder.addSuperAbstract(impl);
+                }
             }
         }
 
@@ -120,5 +129,28 @@ public class DefaultClassCoder implements ClassCoder{
 
         javaFile.writeTo(file);
 
+    }
+
+
+    /**
+     * 构建继承
+     * @param clazz 类包
+     * @param generics 泛型
+     * @return
+     */
+    @Override
+    public TypeName getExtends(String clazz, String... generics){
+
+        List<ClassName> genericsList = new ArrayList<>();
+
+        for (String clz : generics) {
+
+            genericsList.add(com.squareup.javapoetx.ClassName.get(clz.substring(0, clz.lastIndexOf(".")), clz.substring(clz.lastIndexOf(".") + 1)));
+
+        }
+
+        com.squareup.javapoetx.ClassName repository = com.squareup.javapoetx.ClassName.get(clazz.substring(0,clazz.lastIndexOf(".")), clazz.substring(clazz.lastIndexOf(".")+ 1) );
+
+        return com.squareup.javapoetx.ParameterizedTypeName.get(repository, genericsList.stream().toArray(com.squareup.javapoetx.ClassName[]::new));
     }
 }

@@ -58,18 +58,13 @@ public class CoderContext {
     private void AttriAssign() throws IllegalAccessException {
         if (beanMap!=null&&beanMap.size()>0){
             for (Object o:beanMap.values()){
-                // 获取类的属性是否存在 获取bean注解
                 Class<? extends Object> classInfo = o.getClass();
                 Field[] declaredFields = classInfo.getDeclaredFields();
                 for (Field field : declaredFields) {
-                    // 属性名称
                     String name = field.getName();
-                    // 2.使用属性名称查找bean容器赋值
                     Object bean = beanMap.get(name);
                     if (bean != null) {
-                        // 私有访问允许访问
                         field.setAccessible(true);
-                        // 给属性赋值
                         field.set(o, bean);
                     }
                 }
@@ -88,7 +83,6 @@ public class CoderContext {
         for (Class<?> c : allClasses) {
             if (c.getDeclaredAnnotation((Class<? extends Annotation>) Generate.class) != null){
                 Object newInstance = c.newInstance();
-                //获取父类名称并转为首字母小写
                 String beanId = toLowerCaseFirstOne(c.getSimpleName());
                 concurrentHashMap.put(beanId, newInstance);
             }
@@ -104,10 +98,4 @@ public class CoderContext {
         }
     }
 
-    @SneakyThrows
-    public static void main(String[] args) {
-        CoderContext context = new CoderContext("com.abraham.coder");
-        NodeMatchDeduceDto dto = (NodeMatchDeduceDto) context.getBean("nodeMatchDeduceDto");
-        System.out.println(dto.getClass().getPackage().getName());
-    }
 }
